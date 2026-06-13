@@ -4,24 +4,21 @@ WORK=work
 ASSETS=assets
 mkdir -p "$WORK"
 
-CINEMATIC_FILTER="eq=contrast=1.08:saturation=1.15:gamma=0.95,vignette"
+CINEMATIC_FILTER="eq=contrast=1.08:saturation=1.2:gamma=0.95,vignette"
+
+# 4K base resolution
+BASE_W=3840
+BASE_H=2160
 
 SEGMENTS=()
-if [ -f "$WORK/clip.mp4" ]; then
-    ffmpeg -y -i "$WORK/clip.mp4" \
-        -vf "setpts=2.0*PTS,${CINEMATIC_FILTER},scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080" \
-        -an -t 20 "$WORK/seg_main.mp4"
-    SEGMENTS+=("$WORK/seg_main.mp4")
-else
-    for f in "$WORK"/scene_*.png; do
-        idx=$(basename "$f" .png | sed 's/scene_//')
-        out="$WORK/seg_${idx}.mp4"
-        ffmpeg -y -loop 1 -i "$f" -t 5 \
-            -vf "scale=2400:1350,zoompan=z='min(zoom+0.0015,1.15)':d=125:s=1920x1080,${CINEMATIC_FILTER}" \
-            -c:v libx264 -pix_fmt yuv420p "$out"
-        SEGMENTS+=("$out")
-    done
-fi
+for f in "$WORK"/scene_*.png; do
+    idx=$(basename "$f" .png | sed 's/scene_//')
+    out="$WORK/seg_${idx}.mp4"
+    ffmpeg -y -loop 1 -i "$f" -t 5 \
+        -vf "scale=4800:2700,zoompan=z='min(zoom+0.0015,1.15)':d=125:s=${BASE_W}x${BASE_H},${CINEMATIC_FILTER}" \
+        -c:v libx264 -pix_fmt yuv420p "$out"
+    SEGMENTS+=("$out")
+done
 
 if [ ${#SEGMENTS[@]} -eq 1 ]; then
     cp "${SEGMENTS[0]}" "$WORK/base.mp4"
@@ -57,11 +54,13 @@ else
     cp "$WORK/base.mp4" "$WORK/base_audio.mp4"
 fi
 
+# Shorts: 4K vertical (2160x3840)
 ffmpeg -y -i "$WORK/base_audio.mp4" -t 59 \
-    -vf "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920" \
-    -c:v libx264 -c:a aac "$WORK/short.mp4"
+    -vf "scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840" \
+    -c:v libx264 -preset slow -crf 18 -c:a aac "$WORK/short.mp4"
 
+# Long-form: 4K horizontal (3840x2160)
 ffmpeg -y -stream_loop 15 -i "$WORK/base_audio.mp4" -t 300 \
-    -c:v libx264 -c:a aac "$WORK/long.mp4"
+    -c:v libx264 -preset slow -crf 18 -c:a aac "$WORK/long.mp4"
 
-echo "Edit complete: work/short.mp4 and work/long.mp4 ready."
+echo "Edit complete: work/short.mp4 and work/long.mp4 ready (4K)."

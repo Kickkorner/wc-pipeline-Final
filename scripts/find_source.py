@@ -75,9 +75,9 @@ print("Topic:", topic["title"])
 # ---------------------------------------------------------------------------
 def generate_scene(idx, beat_text):
     style_prompt = (
-        f"{beat_text}, vibrant animated cinematic style, football/soccer theme, "
-        "high detail digital illustration, dramatic lighting, trending animation art, "
-        "ultra detailed, 4k"
+        f"{beat_text}, Pixar style 3D animation, football/soccer theme, "
+        "Disney Pixar render, soft cinematic lighting, vibrant colors, "
+        "highly detailed character and environment design, ultra detailed, 4k"
     )
     encoded = requests.utils.quote(style_prompt)
     url = (

@@ -58,7 +58,7 @@ else
 fi
 
 ffmpeg -y -i "$WORK/base_audio.mp4" -t 59 \
-    -vf "scale=1080:-2,crop=1080:1920" \
+    -vf "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920" \
     -c:v libx264 -c:a aac "$WORK/short.mp4"
 
 ffmpeg -y -stream_loop 15 -i "$WORK/base_audio.mp4" -t 300 \

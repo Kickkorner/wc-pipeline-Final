@@ -46,7 +46,20 @@ def get_topic():
         json={"contents": [{"parts": [{"text": prompt}]}]},
         timeout=30,
     )
-    text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+    data = resp.json()
+    if "candidates" not in data:
+        print("Gemini API error response:", data)
+        return {
+            "title": "World Cup Glory",
+            "year": 1986,
+            "beats": [
+                "Empty stadium at dusk, floodlights flickering on",
+                "Silhouette of a player striking the ball in slow motion",
+                "Close-up of golden trophy under spotlight",
+                "Crowd silhouettes celebrating under confetti",
+            ],
+        }
+    text = data["candidates"][0]["content"]["parts"][0]["text"]
     text = text.strip().strip("```json").strip("```")
     return json.loads(text)
 
